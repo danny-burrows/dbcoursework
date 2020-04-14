@@ -2386,17 +2386,17 @@ def delete_topic(topic_id):
         abort(403)
 
     for test in topic.tests:
-        db.session.delete(test)
-
         for mark in test.test_marks:
             db.session.delete(mark)
+
+        db.session.delete(test)
             
 
     for hmwk in topic.homeworks:
-        db.session.delete(hmwk)
-
         for mark in hmwk.homework_marks:
             db.session.delete(mark)
+
+        db.session.delete(hmwk)
 
     db.session.delete(topic)
     db.session.commit()
