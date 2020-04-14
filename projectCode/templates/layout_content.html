@@ -1,0 +1,33 @@
+{% extends "layout_site_main.html" %}
+{% block sublayout %}
+<main role="main" class="container">
+  <div class="row">
+    <div class="col-md-8">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </div>
+    <div class="col-md-4">
+      <div class="content-section">
+        <h3>Build 3.8.9</h3>
+        <p class='text-muted'>Welcome to build 3.8.9 of <font color="black">Student</font><font color="red"><em>Track</em></font>! Get started by heading to the <a href="{{ url_for('courses') }}">Courses</a> page and add your first course, or make a post on the <a href="{{ url_for('home') }}">Teachers Forum</a>.
+          <!-- <ul class="list-group">
+            <li class="list-group-item list-group-item-light"><a href="/register">Register as a user.</a></li>
+            <li class="list-group-item list-group-item-light"><a href="/login">Login as a user.</a></li>
+            <li class="list-group-item list-group-item-light"><a href="/new_class">Create a class.</a></li>
+            <li class="list-group-item list-group-item-light"><a href="/new_student">Add students to a class.</a></li>
+            <li class="list-group-item list-group-item-light"><a href="/account">View and edit all your, and your students, details.</a></li>
+          </ul> -->
+        </p>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock sublayout %}

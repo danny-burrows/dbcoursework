@@ -1,0 +1,25 @@
+{% extends "layout_content.html" %}
+{% block content %}
+    <h1>About Student<font color="red"><i>Track</i></font></h1>
+    <p>Student<font color="red"><i>Track</i></font> is a program designed to aid teachers in organising and managing their courses, students and classes. Please read the "Setup and Installation" section to get started.</p>
+
+    <h3>Getting Started</h3>
+    <p>To get started on Student<font color="red"><i>Track</i></font> it is recommended that you first go to the <a href="{{ url_for('courses') }}">Courses</a> page and add a course. After this you can add topics to this course, and add and assign classes to take this course. Once you have this initial setup done you can add some upcoming homeworks and tests so we can remind you when their scheduled time approaches. Student<font color="red"><i>Track</i></font> can also track the performance of classes over time, if you record your students' progress in Student<font color="red"><i>Track</i></font> you can view statistics on recent performance, monitor completion of homeworks and tests, and get general reminders on the <a href="{{ url_for('dash') }}">Dashboard</a>.</p>
+
+    <h3>Coursework Mention</h3>
+    <p>This website is a coursework project.</p>
+
+    <h3>Setup and Installation</h3>
+    <h5>For Testing and Assessment</h5>
+    <ol>
+    <li> Ensure python 3.6 or greater is installed.</li>
+    <li> Open CMD on Windows, or a terminal on Linux.</li>
+    <li> Navigate to the prototypes directory. (By default this document is contained in it.)</li>
+    <li> If you wish to use a virtual enviroment run `python -m venv ./venv` and then `./venv/Scripts/activate.bat` on Windows, or `./venv/Scripts/activate` on Linux.</li>
+    <li> Run `pip install -r requirements.txt` to install the requirements for this program.</li>
+    <li> Run `python setup-database.py` to initialize the database.</li>
+    <li> Run `python run.py` to run the server.</li>
+    <li> Open a browser and navagate to `localhost:5000`.</li>
+    </ol>
+
+{% endblock content %}

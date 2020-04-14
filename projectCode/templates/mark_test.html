@@ -1,0 +1,34 @@
+{% extends "layout_content.html" %}
+{% block content %}
+<div class="content-section">
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">{{ legend }}</legend>
+            {% for class in classes %}
+            {% if class.students %}
+            <h5 class="mb-3">{{ class.class_name }}</h5>
+            {% endif %}
+            {% for field in mark_fields[class.id] %}
+            <div class="form-group">
+                {{ field[1].label(class="form-control-label") }}
+                {% if field.errors %}
+                    {{ field[1](class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in field.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ field[1](class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            {% endfor %}
+            {% endfor %}
+        </fieldset>
+        <div class="form-group">
+            {{ form.submit(class="btn btn-outline-info") }}
+        </div>
+    </form>
+</div>
+{% endblock content %}

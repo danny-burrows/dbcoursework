@@ -1,0 +1,153 @@
+{% extends "layout_content.html" %}
+{% block content %}
+
+
+
+<form method="POST" action="">
+    {{ s_form.hidden_tag() }}
+    <div class="form-group" style="display:flex;">
+        {% if s_form.search_query.errors %}
+            {{ s_form.search_query(class="form-control form-control-lg is-invalid", style="flex:90%;", placeholder="Search Students...") }}
+            <div class="invalid-feedback">
+                {% for error in s_form.search_query.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% else %}
+            {{ s_form.search_query(class="form-control form-control-lg", style="flex:90%;", placeholder="Search Students...") }}
+        {% endif %}
+        {{ s_form.submit(class="btn btn-light", style="flex:10%;border: 1px solid #dddddd;") }}
+    </div>
+</form>
+  {% if srch %}
+      {% if search_results.all()|length > 0 %}
+          <h3>Search Results</h3>
+          {% for student in search_results %}
+              <article class="media content-section">
+                <div class="media-body">
+                  <!--<div class="article-metadata">
+                    <small class="text-muted mr-2">Beginning: \{\{ class.class_starting_date.strftime('%d %b %Y') \}\}</small>
+                    <small class="text-muted">Week No: x</small>
+                  </div>-->
+                  <div style="display: inline-block;">
+                    <h2><a class="article-title" href="{{ url_for('student', student_id=student.id) }}">{{ student.name }}</a></h2>
+                  </div>
+                  <div style="display: inline-block;float:right;">
+                    <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('student_report', student_id=student.id) }}">Get Report</a>
+                    <a class="btn btn-secondary btn-sm mt-1 mb-1 mr-1" href="{{ url_for('add_to_class', student_id=student.id) }}">Add To Class</a>
+                    <a class="btn btn-secondary btn-sm mt-1 mb-1 mr-1" href="{{ url_for('remove_from_class', student_id=student.id) }}">Remove From Class</a>
+
+                    <div style="display: inline-block;" class="dropdown show">
+                      <a class="btn btn-secondary btn-sm mt-1 mb-1 mr-1 dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class='fas fa-bars'></i>
+                      </a>
+                      <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        <a class="dropdown-item" href="{{ url_for('student', student_id=student.id) }}">Manage</a>
+                        <a class="dropdown-item" href="{{ url_for('update_student', student_id=student.id) }}">Update Details</a>
+                        <button type="button" class="dropdown-item btn-danger" style="color:red;" data-toggle="modal" data-target="#deleteModal{{ student.id }}">Delete</button>
+                      </div>
+                    </div>
+                    <!-- <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_student', student_id=student.id) }}">Update Details</a>
+                    <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal{{ student.id }}">Delete</button> -->
+                  </div>
+                </div>
+              </article>
+              <!-- Modal -->
+              <div class="modal fade" id="deleteModal{{ student.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="deleteModalLabel">Delete Student?</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                      <form action="{{ url_for('delete_student', student_id=student.id) }}" method="POST">
+                        <input class="btn btn-danger" type="submit" value="Delete">
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          {% endfor %}
+
+      {% else %}
+          <h3>No results found!</h3>
+      {% endif %}
+  {% endif %}
+
+
+
+
+
+
+
+    <h1 class="mb-3" style="display: inline-block;">My Students ({{ students|length }})</h1>
+    <a class="btn btn-secondary btn-sm ml-4 mb-3" style="display: inline-block;" href="{{ url_for('new_student') }}">Add Student</a>
+    {% for student in students %}
+        <article class="media content-section">
+          <div class="media-body">
+            <!--<div class="article-metadata">
+              <small class="text-muted mr-2">Beginning: \{\{ class.class_starting_date.strftime('%d %b %Y') \}\}</small>
+              <small class="text-muted">Week No: x</small>
+            </div>-->
+            <div style="display: inline-block;">
+              <h2><a class="article-title" href="{{ url_for('student', student_id=student.id) }}">{{ student.name }}</a></h2>
+              <!-- <p class="mb-1">[Summary of student.]</p> -->
+            </div>
+            <div style="display: inline-block;float:right;">
+              <a class="btn btn-secondary btn-sm mt-1 mb-1 mr-1" href="{{ url_for('student_report', student_id=student.id) }}">Get Report</a>
+              <a class="btn btn-secondary btn-sm mt-1 mb-1 mr-1" href="{{ url_for('add_to_class', student_id=student.id) }}">Add To Class</a>
+              <a class="btn btn-secondary btn-sm mt-1 mb-1 mr-1" href="{{ url_for('remove_from_class', student_id=student.id) }}">Remove From Class</a>
+
+              <div style="display: inline-block;" class="dropdown show">
+                <a class="btn btn-secondary btn-sm mt-1 mb-1 mr-1 dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class='fas fa-bars'></i>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                  <a class="dropdown-item" href="{{ url_for('student', student_id=student.id) }}">Manage</a>
+                  <a class="dropdown-item" href="{{ url_for('update_student', student_id=student.id) }}">Update Details</a>
+                  <button type="button" class="dropdown-item btn-danger" style="color:red;" data-toggle="modal" data-target="#deleteModal{{ student.id }}">Delete</button>
+                </div>
+              </div>
+              <!-- <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_student', student_id=student.id) }}">Update Details</a>
+              <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal{{ student.id }}">Delete</button> -->
+            </div>
+          </div>
+        </article>
+        <!-- Modal -->
+        <div class="modal fade" id="deleteModal{{ student.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Student?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <form action="{{ url_for('delete_student', student_id=student.id) }}" method="POST">
+                  <input class="btn btn-danger" type="submit" value="Delete">
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% endfor %}
+
+    <!-- &% for page_num in students.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+      &% if page_num %}
+        &% if students.page == page_num %}
+          <a class="btn btn-info mb-4" href="&& url_for('students', page=page_num) }}">&& page_num }}</a>
+        &% else %}
+          <a class="btn btn-outline-info mb-4" href="&& url_for('students', page=page_num) }}">&& page_num }}</a>
+        &% endif %}
+      &% else %}
+        ...
+      &% endif %}
+    &% endfor %} -->
+
+{% endblock content %}

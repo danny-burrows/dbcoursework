@@ -1,0 +1,159 @@
+{% extends "layout_content.html" %}
+{% block content %}
+  <article class="parent media content-section">
+
+    <div class="ribbon"><a style="color:white;" href="{{ url_for('courses', course_id=topic.course.id) }}">{{ topic.course.name }}</a></div>
+
+    <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/def.png') }}">
+    <div class="media-body">
+      <!-- <h2><a class="article-title" href="{{ url_for('topic', topic_id=topic.id) }}">{{ topic.name }}</a></h2> -->
+
+
+
+
+      <div class="media-body">
+
+        <div class="pb-2">
+          <h2><a class="article-title" href="{{ url_for('topic', topic_id=topic.id) }}">{{ topic.name }}</a></h2>
+        </div>
+        <p style="display: inline-block;float:right;" class="mr-4">{{ topic.start_date.strftime('%d %b %Y') }}-{{ topic.end_date.strftime('%d %b %Y') }} ({{ (topic.end_date-topic.start_date).days }} Days)</p>
+
+        <div>
+          <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('new_homework', topic_id=topic.id) }}">Add Homework</a>
+          <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('new_test', topic_id=topic.id) }}">Add Test</a>
+          <!-- <a class="btn btn-primary btn-sm mt-1 mb-1 mr-1" href="{{ url_for('topic', topic_id=topic.id) }}">Manage</a> -->
+          <!-- <div style="display: inline-block;" class="dropdown show">
+            <a class="btn btn-secondary btn-sm mt-1 mb-1 mr-1 dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Add
+            </a>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+              <a class="btn btn-secondary btn-sm mt-1 mb-1 mr-1 dropdown-toggle" href="{{ url_for('new_homework', topic_id=topic.id) }}">Homework</a>
+              <a class="btn btn-secondary btn-sm mt-1 mb-1 mr-1 dropdown-toggle" href="{{ url_for('new_test', topic_id=topic.id) }}">Test</a>
+            </div>
+          </div> -->
+          <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_topic', topic_id=topic.id) }}">Update Details</a>
+          <button type="button" class="btn btn-danger btn-sm mb-1 mt-1 mr-0" data-toggle="modal" data-target="#deleteModal{{ topic.id }}">Delete</button>
+        </div>
+
+
+
+        {% if topic.homeworks|length > 0 %}
+          <h5 class="mt-3">Homeworks</h5>
+          {% for homework in topic.homeworks %}
+            <article class="content-section" style="background:#eeeeee;">
+                <div style="display: inline-block;">
+                <h6 class="mt-2">{{ homework.name }}</h6>
+                </div>
+                <div style="display: inline-block;" class="float-right">
+                  <a class="btn btn-primary btn-sm mt-1 mb-1 mr-1" href="{{ url_for('homework', homework_id=homework.id) }}">Manage</a>
+                  <a class="btn btn-primary btn-sm mt-1 mb-1 mr-1" href="{{ url_for('mark_homework', homework_id=homework.id) }}">Mark Homework</a>
+                  <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_homework', homework_id=homework.id) }}">Update Details</a>
+                  <button type="button" class="btn btn-danger btn-sm ml-1 mb-1 mt-1 mr-0" data-toggle="modal" data-target="#deleteModalHH{{ homework.id }}">Delete</button>
+
+
+
+                  <!-- Modal -->
+                  <div class="modal fade" id="deleteModalHH{{ homework.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="deleteModalLabel">Delete Homework?</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <p class="modal-body"><font color="red">Warning: All this Topics tests and homeworks will also be deleted!</font></p>
+
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                          <form action="{{ url_for('delete_homework', homework_id=homework.id) }}" method="POST">
+                            <input class="btn btn-danger" type="submit" value="Delete">
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="text-muted m-0" style="font-size:14px;">Due Date: {{ homework.due_date.strftime("%d %b %Y") }}</p>
+                <p class="text-muted m-0" style="font-size:14px;">Max Mark: {{ homework.max_mark }}</p>
+
+            </article>
+          {% endfor %}
+        {% endif %}
+
+
+        {% if topic.tests|length > 0 %}
+          <h5>Tests</h5>
+          {% for test in topic.tests %}
+            <article class="content-section" style="background:#eeeeee;">
+                <div style="display: inline-block;">
+                <h6 class="mt-2">{{ test.name }}</h6>
+                </div>
+                <div style="display: inline-block;" class="float-right">
+                  <a class="btn btn-primary btn-sm mt-1 mb-1 mr-1" href="{{ url_for('test', test_id=test.id) }}">Manage</a>
+                  <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_test', test_id=test.id) }}">Update Details</a>
+                  <button type="button" class="btn btn-danger btn-sm ml-1 mb-1 mt-1 mr-0" data-toggle="modal" data-target="#deleteModalTT{{ test.id }}">Delete</button>
+                </div>
+                <!-- Modal -->
+                <div class="modal fade" id="deleteModalTT{{ test.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel">Delete Test?</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <p class="modal-body"><font color="red">Warning: All this Topics tests and homeworks will also be deleted!</font></p>
+
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <form action="{{ url_for('delete_test', test_id=test.id) }}" method="POST">
+                          <input class="btn btn-danger" type="submit" value="Delete">
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="text-muted m-0" style="font-size:14px;">Date: {{ test.date.strftime("%d %b %Y") }}</p>
+                <p class="text-muted m-0" style="font-size:14px;">Max Mark: {{ test.max_mark }}</p>
+
+            </article>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+
+
+
+
+      <!-- <div class="mt-3 mb-0">
+        <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_topic', topic_id=topic.id) }}">Update Details</a>
+        <a class="btn btn-secondary btn-sm mt-1 mb-1 ml-1" href="">Add To Class</a>
+        <a class="btn btn-secondary btn-sm mt-1 mb-1 ml-1" href="">Remove From Class</a>
+        <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal">Delete</button>
+      </div> -->
+    </div>
+  </article>
+  <!-- Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Delete Class?</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <form action="{{ url_for('delete_topic', topic_id=topic.id) }}" method="POST">
+            <input class="btn btn-danger" type="submit" value="Delete">
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

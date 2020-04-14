@@ -1,0 +1,129 @@
+{% extends "layout_content.html" %}
+{% block content %}
+  <article class="content-section">
+
+    <div class="media mb-4">
+
+    <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}">
+    <div class="media-body">
+      <div class="article-metadata">
+        <a class="mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
+        <small class="text-muted">{{ post.date_posted.strftime('%d %b %Y - %H:%M') }}</small>
+        {% if post.author == current_user %}
+          <div class="mt-1 mb-1">
+            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_post', post_id=post.id) }}">Update</a>
+            <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal">Delete</button>
+          </div>
+        {% endif %}
+      </div>
+      <h2 class="article-title">{{ post.title }}</h2>
+      <p class="article-content">{{ post.content }}</p>
+    </div>
+
+  </div>
+
+  <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}">
+    {{ form.hidden_tag() }}
+    <legend class="border-bottom">{{ legend }}</legend>
+    {{ form.comment.label(class="form-control-label", style="font-size:14px;") }}
+    <div class="media form-group">
+
+      {% if form.comment.errors %}
+        {{ form.comment(class="form-control form-control-lg is-invalid", style="height: 37px;font-size:13px;") }}
+        <div class="invalid-feedback">
+          {% for error in form.comment.errors %}
+            <span>{{ error }}</span>
+          {% endfor %}
+        </div>
+      {% else %}
+        {{ form.comment(class="form-control form-control-lg", style="height: 37px;font-size:13px;") }}
+      {% endif %}
+
+      {{ form.submit(class="btn-sm btn-outline-info ml-2", style="font-size:13px;") }}
+    </div>
+
+  </form>
+
+  {% for comment in post.comments %}
+  <div class="media mb-4">
+    <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + comment.commenter.image_file) }}">
+    <div class="media-body" style="float:left;">
+      <div class="article-metadata">
+        <a class="mr-2" href="{{ url_for('user_posts', username=comment.commenter.username) }}">{{ comment.commenter.username }}</a>
+        <small class="text-muted">{{ comment.date_posted.strftime('%d %b %Y - %H:%M') }}</small>
+
+      </div>
+      <p id="CE{{ comment.id }}" class="article-content" contenteditable="true">{{ comment.content }}</p>
+    </div>
+    {% if comment.commenter == current_user %}
+      <div class="ml-2 mt-4" style="float:right;">
+        <a class="btn btn-secondary btn-sm" style="color:white;" onClick="updateComment({{ comment.id }})">Update</a>
+        <a class="btn btn-danger btn-sm" href="{{ url_for('delete_comment', post_id=post.id, comment_id=comment.id) }}">Delete</a>
+      </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+
+
+
+
+  </article>
+  <!-- Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Delete Post?</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST">
+            <input class="btn btn-danger" type="submit" value="Delete">
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script type="text/javascript">
+function updateComment(id) {
+  var editableDiv =  document.getElementById("CE" + id);
+  var comment = editableDiv.innerText;
+
+  const Http = new XMLHttpRequest();
+  const url= "/comment/" + id + "/update";
+
+  Http.open("POST", url);
+  Http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  Http.send("comment="+comment);
+
+  Http.onreadystatechange = (e) => {
+    if (Http.status == 201 && Http.responseText && !document.getElementById("SE" + id)) {
+
+      if (Http.responseText[0] == "P"){
+        errorMsg = document.createElement("div");
+        errorMsg.className = "alert alert-danger";
+        errorMsg.id = "SE" + id;
+        var textnode = document.createTextNode(Http.responseText);
+        errorMsg.appendChild(textnode);
+        editableDiv.parentNode.prepend(errorMsg);
+      } else {
+        successMsg = document.createElement("div");
+        successMsg.className = "alert alert-success";
+        successMsg.id = "SE" + id;
+        var textnode = document.createTextNode(Http.responseText);
+        successMsg.appendChild(textnode);
+        editableDiv.parentNode.prepend(successMsg);
+      }
+    }
+  }
+  return 0;
+}
+
+</script>
+
+{% endblock content %}

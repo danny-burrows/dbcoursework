@@ -1,0 +1,210 @@
+{% extends "layout_dashboard.html" %}
+{% block content %}
+
+{% if cur_tops|length %}
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="content-section">
+      {% if cur_tops|length %}
+          <h2 class="article-title">Current Topic{% if cur_tops|length > 1 %}s{% endif %}</h2>
+          {% for cur_top in cur_tops %}
+              <h5 class="article-content">{{ cur_top[0].name }}: {{ cur_top[1].name }}</h5>
+          {% endfor %}
+      {% endif %}
+    </div>
+
+    <div class="content-section">
+      <h2 class="article-title">Homeworks / Tests</h2>
+      {% if upcoming_homeworks|length %}
+          <h5 class="article-content m-0 mb-2">Upcoming Homeworks:</h5>
+          {% for up_hmwk in upcoming_homeworks %}
+              <p class="article-content">- {{ up_hmwk[0].name }} (Due {{ up_hmwk[0].due_date.strftime('%d %b %Y') }})</p>
+          {% endfor %}
+      {% endif %}
+
+      {% if due_homeworks|length %}
+          <h5 class="article-content m-0 mb-2">Homeworks Due:</h5>
+          {% for due_hmwk in due_homeworks %}
+            <div class="d-block">
+              <div style="display: inline-block; float:left;">
+                <p class="article-content mb-2">- {{ due_hmwk[0].name }} (Due {{ due_hmwk[0].due_date.strftime('%d %b %Y') }}</p>
+              </div>
+              <div style="display: inline-block; float:right;">
+                <a class="btn btn-sm btn-primary"  href="{{ url_for('mark_homework', homework_id=due_hmwk[0].id) }}">Mark Homework</a>
+              </div>
+              <p>)</p>
+            </div>
+          {% endfor %}
+      {% endif %}
+
+
+      {% if due_tests|length %}
+          <h5 class="article-content m-0 mb-2">Tests Due:</h5>
+          {% for due_test in due_tests %}
+            <div class="d-block">
+              <div style="display: inline-block; float:left;">
+                <p class="article-content mb-2">- {{ due_test[0].name }} (Due {{ due_test[0].date.strftime('%d %b %Y') }}</p>
+              </div>
+              <div style="display: inline-block; float:right;">
+                <a class="btn btn-sm btn-primary"  href="{{ url_for('mark_test', test_id=due_test[0].id) }}">Mark Test</a>
+              </div>
+              <p>)</p>
+            </div>
+          {% endfor %}
+      {% endif %}
+    </div>
+
+    <div class="content-section">
+      <h2 class="article-title">Homework Submissions</h2>
+      {% if due_homeworks|length %}
+      {% for due_hmwk in due_homeworks %}
+      <h5 class="article-content mt-2">{{ due_hmwk[0].name }} (Due {{ due_hmwk[0].due_date.strftime('%d %b %Y') }})</h5>
+      {% for xclass in cur_top_classes %}
+      <p class="article-content m-0 mt-2"><b>{{ xclass.class_name }}</b></p>
+      {% for student in xclass.students %}
+
+      {% if homework_marks[due_hmwk[0].id][student.id] %}
+          {% if homework_marks[due_hmwk[0].id][student.id][0].late %}
+              <p class="article-content mb-0" style="background: orange;">- {{ student.name }}</p>
+          {% else  %}
+              <p class="article-content mb-0" style="background: #339933;">- {{ student.name }}</p>
+          {% endif %}
+      {% else %}
+          <!-- <p class="article-content mb-0" style="background: #dd4444;">- {{ student.name }}</p> -->
+          <div style="background: #dd4444;">
+            <div style="display: inline-block;">
+              <p class="article-content mb-2" >- {{ student.name }}</p>
+            </div>
+            <div style="display: inline-block; float:right;">
+
+              <form style="display: inline-block; float:right;" method="POST" action="/submit_homework">
+                <input name="homework_id" required="" type="hidden" value="{{ due_hmwk[0].id }}">
+                <input name="student_id" required="" type="hidden" value="{{ student.id }}">
+                <input style="display: inline-block; float:left;"  id="mark" name="mark" required="" type="int" value="">
+                <input style="display: inline-block; float:left;"  id="date_handed_in" name="date_handed_in" required="" type="date" value="">
+                <input style="display: inline-block; float:right;" id="submit" name="submit" type="submit" value="Submit">
+                <!-- <a style="display: inline-block; float:right;" type="submit"><font color="#000077">HAND IN</font></a> -->
+              </form>
+            </div>
+          </div>
+      {% endif %}
+      {% endfor %}
+      {% endfor %}
+      {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+
+
+  <div class="col-md-6">
+    <div id="graph-container" class="content-section">
+
+      <div class="row">
+        <div class="col-md-7">
+          <h2 class="article-title">Recent Performance</h2>
+        </div>
+
+        <div class="col-md-5 form-group">
+           <label for="datasetChoice">Choose Dataset</label>
+           <select class="form-control" id="datasetChoice">
+             <option>Avg Class Performance Last Test</option>
+             <option>Avg Class Performance By Assignment</option>
+             <!-- <option>Avg Class Performance Over Time</option>
+             <option>Avg Class Performance By Test</option>
+             <option>5</option> -->
+           </select>
+         </div>
+      </div>
+
+
+
+       <canvas id="performanceGraph"></canvas>
+
+      </div>
+      <div class="content-section">
+        <h2 class="article-title">Latest Test</h2>
+        {% if due_tests|length %}
+        {% for due_test in due_tests %}
+        <h5 class="article-content mt-2">{{ due_test[0].name }} (Due {{ due_test[0].date.strftime('%d %b %Y') }})</h5>
+        {% for xclass in cur_top_classes %}
+        <p class="article-content m-0 mt-2"><b>{{ xclass.class_name }}</b></p>
+        {% for student in xclass.students %}
+
+        {% if test_marks[due_test[0].id][student.id] %}
+            {% if test_marks[due_test[0].id][student.id][0].late %}
+                <p class="article-content mb-0" style="background: orange;">- (Late) {{ student.name }}</p>
+            {% else  %}
+                <p class="article-content mb-0" style="background: #339933;">- {{ student.name }}</p>
+            {% endif %}
+        {% else %}
+            <!-- <p class="article-content mb-0" style="background: #dd4444;">- {{ student.name }}</p> -->
+            <div style="background: #dd4444;">
+              <div style="display: inline-block;">
+                <p class="article-content mb-2" >- {{ student.name }}</p>
+              </div>
+              <div style="display: inline-block; float:right;">
+                <form style="display: inline-block; float:right;" method="POST" action="/submit_test">
+                  <input name="test_id" required="" type="hidden" value="{{ due_test[0].id }}">
+                  <input name="student_id" required="" type="hidden" value="{{ student.id }}">
+                  <input style="display: inline-block; float:left;"  id="mark" name="mark" required="" type="int" value="">
+                  <input style="display: inline-block; float:left;"  id="date_handed_in" name="date_handed_in" required="" type="date" value="">
+                  <input style="display: inline-block; float:right;" id="submit" name="submit" type="submit" value="Submit">
+                  <!-- <a style="display: inline-block; float:right;" type="submit"><font color="#000077">HAND IN</font></a> -->
+                </form>
+              </div>
+            </div>
+        {% endif %}
+        {% endfor %}
+        {% endfor %}
+        {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% else %}
+<div class="d-flex justify-content-center">
+  <span class="align-middle"><h1>You do not have any current topics.</h1>
+  <h3><a class="justify-content-center" href="{{ url_for('topics') }}">Create one on the topics page!</a></h3></span>
+</div>
+{% endif %}
+
+<!-- Linking all the scripts! -->
+<script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/dashboard_charts.js') }}"></script>
+<script type="text/javascript">
+
+  // Setting graph to load onload.
+  $(document).ready(function() {
+    changeChart("performanceGraph", "bar",
+               {{ class_perf.labels | safe }},
+               {{ class_perf.datasets | safe }});
+  });
+
+  // Changing graph upon users' selection.
+  $('#datasetChoice').on("change",function() {
+     if ($(this).val() == "Avg Class Performance Last Test") {
+       changeChart("performanceGraph", "bar",
+                  {{ class_perf.labels | safe }},
+                  {{ class_perf.datasets | safe }});
+
+     } else if ($(this).val() == "Avg Class Performance Over Time") {
+       changeChart("performanceGraph", "line",
+                  {{ classes_perf_time.labels | safe }},
+                  {{ classes_perf_time.datasets | safe }});
+
+     } else if ($(this).val() == "Avg Class Performance By Assignment") {
+       changeChart("performanceGraph", "line",
+                  {{ classes_perf_per_test.labels | safe }},
+                  {{ classes_perf_per_test.datasets | safe }});
+
+     }
+     else {
+       console.log($(this).val());
+     }
+   });
+
+</script>
+{% endblock content %}

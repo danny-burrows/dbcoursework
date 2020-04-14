@@ -1,0 +1,74 @@
+{% extends "layout_content.html" %}
+{% block content %}
+<div class="content-section">
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">{{ legend }}</legend>
+            <div class="form-group">
+                {{ form.class_name.label(class="form-control-label") }}
+                {% if form.class_name.errors %}
+                    {{ form.class_name(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.class_name.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.class_name(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+
+            {% if form.course_id.enabled %}
+            <div class="form-group">
+                {{ form.course_id.label(class="form-control-label") }}
+                {% if form.course_id.errors %}
+                    {{ form.course_id(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.course_id.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.course_id(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+            {% else %}
+            {{ form.course_id(class="d-none") }}
+            {% endif %}
+
+            <div class="form-group">
+                {{ form.class_starting_date.label(class="form-control-label") }}
+                {% if form.class_starting_date.errors %}
+                    {{ form.class_starting_date(class="form-control form-control-lg is-invalid") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.class_starting_date.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.class_starting_date(class="form-control form-control-lg") }}
+                {% endif %}
+            </div>
+
+            <!-- Old manual date method, now replaced by wtforms html5 datefield
+            <div class="form-group">
+                {{ form.class_starting_date.label(class="form-control-label") }}
+                {% if form.class_starting_date.errors %}
+                    <input class="form-control form-control-lg is-invalid" id="class_starting_date" name="class_starting_date" type="date" value="{{ form.class_starting_date.data }}">
+                    <div class="invalid-feedback">
+                        {% for error in form.class_starting_date.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <input class="form-control form-control-lg" id="class_starting_date" name="class_starting_date" type="date" value="{{ form.class_starting_date.data }}">
+                {% endif %}
+            </div>-->
+        </fieldset>
+        <div class="form-group">
+            {{ form.submit(class="btn btn-outline-info") }}
+        </div>
+    </form>
+</div>
+{% endblock content %}

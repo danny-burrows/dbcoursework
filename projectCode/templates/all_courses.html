@@ -1,0 +1,176 @@
+{% extends "layout_content.html" %}
+{% block content %}
+    <h1 class="mb-3" style="display: inline-block;">My Courses ({{ courses.total }})</h1>
+    <a class="btn btn-secondary btn-sm ml-4 mb-3" style="display: inline-block;" href="{{ url_for('new_course') }}">Add Course</a>
+    {% for course in courses.items %}
+        <article class="media content-section">
+          <div class="media-body">
+
+            <div style="display: inline-block">
+              <h2><a class="article-title" href="{{ url_for('courses', course_id=course.id) }}">{{ course.name }}</a></h2>
+            </div>
+
+            <div style="display: inline-block; float:right;">
+              <!-- <a class="btn btn-primary btn-sm mt-1 mb-1 mr-1" href="{{ url_for('courses', course_id=course.id) }}">Manage</a> -->
+              <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('new_topic', course_id=course.id, next='courses') }}">Add Topic</a>
+              <a class="btn btn-secondary btn-sm mt-1 ml-1 mb-1" href="{{ url_for('new_exam', course_id=course.id, next='courses') }}">Add Exam</a>
+              <div style="display: inline-block;" class="dropdown show ml-1">
+                <a class="btn btn-secondary btn-sm mt-1 mb-1 mr-1 dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class='fas fa-bars'></i>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                  <a class="dropdown-item" href="{{ url_for('update_course', course_id=course.id) }}">Update Details</a>
+                  <button type="button" class="dropdown-item btn-danger" style="color:red;" data-toggle="modal" data-target="#deleteModal{{ course.id }}">Delete</button>
+                </div>
+              </div>
+              <!-- <a class="btn btn-secondary btn-sm mt-1 ml-1 mb-1" href="{{ url_for('update_course', course_id=course.id) }}">Update Details</a>
+              <button type="button" class="btn btn-danger btn-sm ml-1 mb-1 mt-1 mr-0" data-toggle="modal" data-target="#deleteModal{{ course.id }}">Delete</button> -->
+            </div>
+
+            <div class="mb-3">
+              <p class="m-0">Duration: {{ course.start_date.strftime('%b %Y') }}-{{ course.start_date.replace(year=course.start_date.year + course.year_num).strftime('%y') }} ({{ course.year_num }} Years)</p>
+              <p class="m-0">Grading System: {{ course.grading_system[1:] }}</p>
+
+              {% if course.classes|length > 0 %}
+              <p>Classes Enrolled:
+              {% for xclass in course.classes %}
+              <br>- {{ xclass.class_name }}
+              {% endfor %}
+              </p>
+              {% else %}
+              <p>Classes Enrolled: None</p>
+              {% endif %}
+
+            </div>
+
+
+            {% if course.topics %}
+              <h5>Topics</h5>
+              {% for topic in course.topics %}
+                <article class="content-section" style="background:#eeeeee;">
+                    <div style="display: inline-block;">
+                    <a href="{{ url_for('topic', topic_id=topic.id) }}"><h6 class="mt-2">{{ topic.name }}</h6></a>
+                    </div>
+                    <div style="display: inline-block;" class="float-right">
+
+                      <div style="display: inline-block;" class="dropdown show">
+                        <a class="btn btn-secondary btn-sm mt-1 mb-1 mr-1 dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          <i class='fas fa-bars'></i>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                          <a class="dropdown-item" href="{{ url_for('topic', topic_id=topic.id) }}">Manage</a>
+                          <a class="dropdown-item" href="{{ url_for('update_topic', topic_id=topic.id) }}">Update Details</a>
+                          <button type="button" class="dropdown-item btn-danger" style="color:red;" data-toggle="modal" data-target="#deleteModalT{{ topic.id }}">Delete</button>
+                        </div>
+                      </div>
+                    </div>
+                </article>
+                <!-- Modal -->
+                <div class="modal fade" id="deleteModalT{{ topic.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel">Delete Topic?</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <p class="modal-body"><font color="red">Warning: All this Topic's homeworks and tests will also be deleted!</font></p>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <form action="{{ url_for('delete_topic', topic_id=topic.id) }}" method="POST">
+                          <input class="btn btn-danger" type="submit" value="Delete">
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            {% endif %}
+
+
+            {% if course.exams %}
+              <h5>Exams</h5>
+              {% for exam in course.exams %}
+                <article class="content-section" style="background:#eeeeee;">
+                    <div style="display: inline-block;">
+                    <a href="{{ url_for('courses', course_id=course.id) }}"><h6 class="mt-2">{{ exam.name }}</h6></a>
+                    </div>
+                    <div style="display: inline-block;" class="float-right">
+                      <!-- <a class="btn btn-primary btn-sm mt-1 mb-1 mr-1" href="{{ url_for('courses', course_id=course.id) }}">Manage</a> -->
+                      <a class="btn btn-primary btn-sm mt-1 mb-1 mr-1" href="{{ url_for('mark_exam', exam_id=exam.id) }}">Mark Exam</a>
+                      <div style="display: inline-block;" class="dropdown show">
+                        <a class="btn btn-secondary btn-sm mt-1 mb-1 mr-1 dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          <i class='fas fa-bars'></i>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                          <a class="dropdown-item" href="{{ url_for('courses', course_id=course.id) }}">Manage</a>
+                          <a class="dropdown-item" href="{{ url_for('update_exam', exam_id=exam.id) }}">Update Details</a>
+                          <button type="button" class="dropdown-item btn-danger" style="color:red;" data-toggle="modal" data-target="#deleteModalE{{ exam.id }}">Delete</button>
+                        </div>
+                      </div>
+                      <!-- <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_exam', exam_id=exam.id) }}">Update Details</a>
+                      <button type="button" class="btn btn-danger btn-sm ml-1 mb-1 mt-1 mr-0" data-toggle="modal" data-target="#deleteModalE{{ exam.id }}">Delete</button> -->
+                    </div>
+                </article>
+                <!-- Modal -->
+                <div class="modal fade" id="deleteModalE{{ exam.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel">Delete Exam?</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <form action="{{ url_for('delete_exam', exam_id=exam.id) }}" method="POST">
+                          <input class="btn btn-danger" type="submit" value="Delete">
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            {% endif %}
+
+
+          </div>
+        </article>
+        <!-- Modal -->
+        <div class="modal fade" id="deleteModal{{ course.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Course?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <p class="modal-body"><font color="red">Warning: All this Course's topics, classes and students will also be deleted!</font></p>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <form action="{{ url_for('delete_course', course_id=course.id) }}" method="POST">
+                  <input class="btn btn-danger" type="submit" value="Delete">
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% endfor %}
+    {% for page_num in courses.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+      {% if page_num %}
+        {% if courses.page == page_num %}
+          <a class="btn btn-info mb-4" href="{{ url_for('courses', page=page_num) }}">{{ page_num }}</a>
+        {% else %}
+          <a class="btn btn-outline-info mb-4" href="{{ url_for('courses', page=page_num) }}">{{ page_num }}</a>
+        {% endif %}
+      {% else %}
+        ...
+      {% endif %}
+    {% endfor %}
+
+
+
+{% endblock content %}

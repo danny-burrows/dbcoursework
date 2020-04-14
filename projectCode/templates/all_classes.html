@@ -1,0 +1,57 @@
+{% extends "layout_content.html" %}
+{% block content %}
+    <h1 class="mb-3" style="display: inline-block;">My Classes ({{ classes.total }})</h1>
+    <a class="btn btn-secondary btn-sm ml-4 mb-3" style="display: inline-block;" href="{{ url_for('new_class') }}">Add Class</a>
+    {% for class in classes.items %}
+        <article class="media content-section parent">
+
+          <div class="ribbon"><a style="color:white;" href="{{ url_for('courses', course_id=class.course.id) }}">{{ class.course.name }}</a></div>
+
+          <div class="media-body">
+            <div class="article-metadata">
+              <small class="text-muted mr-2">Beginning: {{ class.class_starting_date.strftime('%d %b %Y') }}</small>
+            </div>
+            <h2><a class="article-title" href="{{ url_for('xclass', class_id=class.id) }}">{{ class.class_name }}</a></h2>
+            <div class="mt-3 mb-0">
+              <a class="btn btn-primary btn-sm mt-1 mb-1 mr-1" href="{{ url_for('xclass', class_id=class.id) }}">Manage</a>
+              <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('class_report', class_id=class.id) }}">Get Report</a>
+              <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_class', class_id=class.id) }}">Update</a>
+              <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal{{ class.id }}">Delete</button>
+            </div>
+          </div>
+        </article>
+        <!-- Modal -->
+        <div class="modal fade" id="deleteModal{{ class.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+              <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Class?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <p class="modal-body"><font color="red">Warning: All this Classes students will also be deleted if this class is the only class they are assigned to!</font></p>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <form action="{{ url_for('delete_class', class_id=class.id) }}" method="POST">
+                  <input class="btn btn-danger" type="submit" value="Delete">
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+    {% endfor %}
+    {% for page_num in classes.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+      {% if page_num %}
+        {% if classes.page == page_num %}
+          <a class="btn btn-info mb-4" href="{{ url_for('classes', page=page_num) }}">{{ page_num }}</a>
+        {% else %}
+          <a class="btn btn-outline-info mb-4" href="{{ url_for('classes', page=page_num) }}">{{ page_num }}</a>
+        {% endif %}
+      {% else %}
+        ...
+      {% endif %}
+    {% endfor %}
+
+{% endblock content %}

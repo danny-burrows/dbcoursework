@@ -1,0 +1,134 @@
+{% extends "layout_content.html" %}
+{% block content %}
+
+  <form method="POST" action="">
+      {{ s_form.hidden_tag() }}
+      <div class="form-group" style="display:flex;">
+          {% if s_form.search_query.errors %}
+              {{ s_form.search_query(class="form-control form-control-lg is-invalid", style="flex:90%;", placeholder="Search Forum...") }}
+              <div class="invalid-feedback">
+                  {% for error in s_form.search_query.errors %}
+                      <span>{{ error }}</span>
+                  {% endfor %}
+              </div>
+          {% else %}
+              {{ s_form.search_query(class="form-control form-control-lg", style="flex:90%;", placeholder="Search Forum...") }}
+          {% endif %}
+          {{ s_form.submit(class="btn btn-light", style="flex:10%;border: 1px solid #dddddd;") }}
+      </div>
+  </form>
+    {% if srch %}
+        {% if search_results.all()|length > 0 %}
+            <h4>Post Search Results</h4>
+            {% for post in search_results %}
+            <article  class="content-section">
+              <div class="media mb-4">
+                <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}">
+                <div class="media-body">
+                  <div class="article-metadata">
+                    <a class="mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
+                    <small class="text-muted">{{ post.date_posted.strftime('%d %b %Y - %H:%M') }}</small>
+                  </div>
+                  <h2><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h2>
+                  <p class="article-content">{{ post.content }}</p>
+                </div>
+              </div>
+              <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}">
+                {{ form.hidden_tag() }}
+                <legend class="border-bottom">{{ legend }}</legend>
+                {{ form.comment.label(class="form-control-label", style="font-size:14px;") }}
+                <div class="media form-group">
+
+                  {% if form.comment.errors %}
+                    {{ form.comment(class="form-control form-control-lg is-invalid", style="height: 37px;font-size:13px;") }}
+                    <div class="invalid-feedback">
+                      {% for error in form.comment.errors %}
+                        <span>{{ error }}</span>
+                      {% endfor %}
+                    </div>
+                  {% else %}
+                    {{ form.comment(class="form-control form-control-lg", style="height: 37px;font-size:13px;") }}
+                  {% endif %}
+
+                  {{ form.submit(class="btn-sm btn-outline-info ml-2", style="font-size:13px;") }}
+                </div>
+              </form>
+            </article>
+            {% endfor %}
+
+
+        {% else %}
+            <h4>No post results found!</h4>
+        {% endif %}
+
+            {% if search_user_results.all()|length > 0 %}
+                <h4>User Search Results</h4>
+                {% for userR in search_user_results %}
+                    <article class="media content-section">
+                          <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + userR.image_file) }}">
+                          <h2><a href="{{ url_for('user_posts', username=userR.username) }}">{{ userR.username }}</a></h2>
+                    </article>
+
+                {% endfor %}
+
+                {% else %}
+                    <h4>No user results found!</h4>
+                {% endif %}
+                <hr>
+
+    {% endif %}
+
+<h3>Teacher Forum</h3>
+  {% for post in posts.items %}
+
+
+
+    <article  class="content-section">
+
+      <div class="media mb-4">
+        <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + post.author.image_file) }}">
+        <div class="media-body">
+          <div class="article-metadata">
+            <a class="mr-2" href="{{ url_for('user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
+            <small class="text-muted">{{ post.date_posted.strftime('%d %b %Y - %H:%M') }}</small>
+          </div>
+          <h2><a class="article-title" href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h2>
+          <p class="article-content">{{ post.content }}</p>
+        </div>
+      </div>
+
+      <form method="POST" action="{{ url_for('add_comment', post_id=post.id) }}">
+        {{ form.hidden_tag() }}
+        <legend class="border-bottom">{{ legend }}</legend>
+        {{ form.comment.label(class="form-control-label", style="font-size:14px;") }}
+        <div class="media form-group">
+
+          {% if form.comment.errors %}
+            {{ form.comment(class="form-control form-control-lg is-invalid", style="height: 37px;font-size:13px;") }}
+            <div class="invalid-feedback">
+              {% for error in form.comment.errors %}
+                <span>{{ error }}</span>
+              {% endfor %}
+            </div>
+          {% else %}
+            {{ form.comment(class="form-control form-control-lg", style="height: 37px;font-size:13px;") }}
+          {% endif %}
+
+          {{ form.submit(class="btn-sm btn-outline-info ml-2", style="font-size:13px;") }}
+        </div>
+
+      </form>
+    </article>
+  {% endfor %}
+  {% for page_num in posts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+    {% if page_num %}
+      {% if posts.page == page_num %}
+        <a class="btn btn-info mb-4" href="{{ url_for('home', page=page_num) }}">{{ page_num }}</a>
+      {% else %}
+        <a class="btn btn-outline-info mb-4" href="{{ url_for('home', page=page_num) }}">{{ page_num }}</a>
+      {% endif %}
+    {% else %}
+      ...
+    {% endif %}
+  {% endfor %}
+{% endblock content %}
