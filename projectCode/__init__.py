@@ -20,6 +20,6 @@ app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USER')
 app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASS')
 mail = Mail(app)
 
-app.config['PDF_FILE_DUMP'] = "projectCode/static/pdf_gen/"
+app.config['PDF_FILE_DUMP'] = "/home/dbcoursework/dbcoursework/projectCode/static/pdf_gen/"
 
 from projectCode import routes
