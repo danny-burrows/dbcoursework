@@ -1,3 +1,9 @@
+# This file contains the database models, they are instansiated when the server
+# is started and their objects are used to make all actions on the database.
+# All database models contain the tables fields as attributes and all methods
+# in the model are the processes used to manipulate their data.
+
+
 from datetime import datetime
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from projectCode import db, login_manager, app
@@ -7,6 +13,7 @@ from flask_login import UserMixin
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
 
 # The User model contains all the fields in the User table. It also contains the
 # function needed to validate the password reset token when the user wishes to
@@ -63,7 +70,7 @@ class Comment(db.Model):
     def __repr__(self):
         return f"Comment('{self.content}', '{self.date_posted}')"
 
-
+# Register link table between classes and students.
 ClassRegister = db.Table('ClassRegister',
                     db.Column('class_id', db.Integer, db.ForeignKey('class.id')),
                     db.Column('student_id', db.Integer, db.ForeignKey('student.id')))

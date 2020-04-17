@@ -50,6 +50,7 @@ def monthList(dates):
         mlist.append(datetime(y, m+1, 1).strftime("%b-%y"))
     return mlist
 
+
 def exMonthList(start, end):
     # start, end = [datetime.strptime(_, "%Y-%m-%d") for _ in dates]
     total_months = lambda dt: dt.month + 12 * dt.year
@@ -99,7 +100,8 @@ def home():
                         search_results=search_results,
                         search_user_results=search_user_results)
 
-
+# The dash route contains all the calculation and response for the data displayed
+# in the dashboard page.
 @app.route("/dash")
 def dash():
 
@@ -128,17 +130,12 @@ def dash():
             elif test.date <= datetime.utcnow():
                 due_tests.append([test, cur_top[1]])
 
-    # classes = Class.query.filter(Class.course_id.in_(courses))
 
     cur_top_classes = set()
     for cur_top in cur_tops:
 
         cur_top_classes.update(cur_top[0].classes)
 
-        # xClass = Class.query.filter_by(course_id=cur_top[1].course_id)
-        # cur_top_students.update(xClass.students)
-        # xClass.all()
-        # cur_top_classes.update(xClass)
 
     homework_marks = {}
     for homework in due_homeworks:
@@ -155,20 +152,13 @@ def dash():
                 try:
                     if len(homework_marks[homework[0].id][student.id]):
                         hmwk = Homework.query.filter_by(id=mark[0].homework_id).first_or_404()
-                        #print(hmwk)
-                        #print(homework_marks[homework[0].id][student.id][0].date_handed_in)
-                        #print(hmwk.due_date)
                         if homework_marks[homework[0].id][student.id][0].date_handed_in > hmwk.due_date:
                             print("")
                             homework_marks[homework[0].id][student.id][0].late = True
-                        #print(homework_marks[homework[0].id][student.id])
-                        #print(student.name, mark)
                 except:
-                    #print("PASSING DATE CHECK (PROBABLY HAND IN DATE IS NULL)", homework_marks[homework[0].id][student.id][0])
                     pass
 
 
-    #print(homework_marks)
 
     test_marks = {}
     for test in due_tests:
@@ -185,27 +175,16 @@ def dash():
                 try:
                     if len(test_marks[test[0].id][student.id]):
                         tst = Test.query.filter_by(id=mark[0].test_id).first_or_404()
-                        #print(tst)
-                        #print(test_marks[test[0].id][student.id][0].date_completed)
-                        #print(tst.date)
                         if test_marks[test[0].id][student.id][0].date_completed > tst.date:
                             print("")
                             test_marks[test[0].id][student.id][0].late = True
-                        #print(test_marks[test[0].id][student.id])
-                        #print(student.name, mark)
                 except Exception as e:
-                    # raise e
                     print("PASSING DATE CHECK (PROBABLY HAND IN DATE IS NULL)", test_marks[test[0].id][student.id][0])
                     pass
 
 
-    #print(cur_top_classes)
-    # print(cur_top_students)
-
-    # BAR GRAPH ######################################################
-
+    # Class performance in last test graph.
     class_perf = Graph("Avg Class Performance On Last Test", "bar")
-    # class_perf_data = GraphDataset("Avg Class Performance On Last Test")
     class_perf_data = {"label":"Avg Class Performance Last Test", "data":[]}
 
     for xclass in cur_top_classes:
@@ -224,8 +203,6 @@ def dash():
 
 
             try:
-                #print(mrks)
-                #print(sum(mrks))
                 avg = sum(mrks) / len(mrks)
                 class_perf_data["data"].append(avg)
             except ZeroDivisionError:
@@ -234,7 +211,6 @@ def dash():
 
     class_perf.datasets.append(class_perf_data)
 
-    # LINE GRAPH ######################################################
 
     classes_perf_time = Graph("Avg Classes Performance Over Time", "line")
 
@@ -242,13 +218,9 @@ def dash():
     classes_perf_time.labels = monthList(dates)
 
 
-
-
-
     courses = db.session.query(Course.id).filter_by(teacher=current_user)
     classes = Class.query.filter(Class.course_id.in_(courses)).all()
 
-    #print("NEW\n\n\n\n")
 
     # Getting date span for graph...
     topics_start_asc = Topic.query.filter(Topic.course_id.in_(courses)).order_by(Topic.start_date.asc()).all()
@@ -279,8 +251,7 @@ def dash():
             classes_perf_time.datasets.append(class_perf_data)
 
 
-    # LINE GRAPH ######################################################
-
+    # Class performance per assignment test.
     classes_perf_per_test = Graph("Avg Classes Performance Over Time", "line")
 
 
@@ -293,13 +264,11 @@ def dash():
 
 
     for xclass in classes:
-        #print(xclass.class_name)
         classes_perf_per_test_data = {"label":xclass.class_name, "data":[]}
 
         for topic in topics:
 
             for hmwk in topic.homeworks:
-                #print(hmwk.name)
                 labels.append("HMWK "+topic.name+" "+hmwk.name)
 
                 # Get avg perf
@@ -330,7 +299,6 @@ def dash():
 
 
             for test in topic.tests:
-                #print(test.name)
                 labels.append("TEST "+topic.name+" "+test.name)
 
                 # Get avg perf
@@ -361,12 +329,7 @@ def dash():
 
 
 
-        #print("\n\n", classes_perf_per_test_data["data"])
-
-
         classes_perf_per_test.datasets.append(classes_perf_per_test_data)
-
-            # Get avg perf
 
     # Remove duplicates...
     n_labels = []
@@ -375,22 +338,6 @@ def dash():
             n_labels.append(label)
 
     classes_perf_per_test.labels = n_labels
-
-    #print(n_labels)
-
-
-
-
-    # for xclass in classes:
-    #     class_perf_data = GraphDataset(xclass.class_name)
-    #
-    #
-    #
-    #     classes_perf_per_test.datasets.append(class_perf_data)
-
-
-
-
 
 
     return render_template('dash.html', cur_tops=cur_tops,
@@ -406,7 +353,7 @@ def dash():
 
 
 
-
+# Route to allow user to post the result of a homework via the dashboard.
 @app.route('/submit_homework', methods=['POST'])
 def submit_homework():
     mark = request.form['mark']
@@ -439,6 +386,7 @@ def submit_homework():
     return redirect(url_for('dash'))
 
 
+# Route to allow user to post the result of a test via the dashboard.
 @app.route('/submit_test', methods=['POST'])
 def submit_test():
     mark = request.form['mark']
@@ -453,10 +401,6 @@ def submit_test():
         return redirect(url_for('dash'))
 
     test = Test.query.first_or_404(test_id)
-    print("MAAXAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-    print(test)
-    print(mark)
-    print(test.max_mark)
     if int(mark) > test.max_mark:
         flash('Mark is more than the Tests maximum mark.', 'danger')
         return redirect(url_for('dash'))
@@ -472,7 +416,7 @@ def submit_test():
     flash('Test has been marked!', 'success')
     return redirect(url_for('dash'))
 
-
+# The comment route is for users to sumbit a comment to a post.
 @app.route('/post/<int:post_id>/comment', methods=['POST'])
 @login_required
 def add_comment(post_id):
@@ -507,19 +451,15 @@ def update_comment(comment_id):
     print(comment_content)
 
     if len(comment_content) > 500:
-        # flash('Comment is too long!', 'danger')
         return "Post is too long!", 201
 
     if len(comment_content) < 2:
-        # flash('No comment found!', 'danger')
         return "Post content too short!", 201
 
 
     comment.content = comment_content
     db.session.commit()
     return "Your Post Was Updated Successfully!", 201
-    # flash('Your comment has been posted!', 'success')
-    # return redirect(url_for('post', post_id=post_id))
 
 
 @app.route("/post/<int:post_id>/comment/<int:comment_id>/delete", methods=['GET'])
@@ -654,6 +594,7 @@ def post(post_id):
     comments = Comment.query.filter_by(post=post)
     return render_template('single_post.html', title=post.title, form=form, post=post, comments=comments)
 
+
 # Checks for the user to be authenticated and allows them to update the post if the post
 # belongs to them.
 @app.route("/post/<int:post_id>/update", methods=['GET', 'POST'])
@@ -768,7 +709,6 @@ def new_class():
     if not len(courses):
         flash(Markup('To add a class you must first <a href="' + url_for('new_course') + '">add a course</a>.'), 'danger')
 
-
     # If user doesn't request for a course, then enable the select box and set the result as the course_id...
     try:
         course_id = request.args['course_id']
@@ -794,13 +734,6 @@ def new_class():
         next_page = request.args.get('next')
         return redirect(next_page) if next_page else redirect(url_for('classes'))
 
-    # form = ClassForm()
-    # if form.validate_on_submit():
-    #     new_class = Class(class_name=form.class_name.data, class_starting_date=form.class_starting_date.data, teacher=current_user)
-    #     db.session.add(new_class)
-    #     db.session.commit()
-    #     flash('Your new class has been added!', 'success')
-    #     return redirect(url_for('classes'))
     return render_template('new_class.html', title='Create Class', form=form, legend="Add A Class To Manage")
 
 
@@ -912,7 +845,7 @@ def xclass(class_id):
 
     classes_perf_per_test.datasets.append(classes_perf_per_test_data)
 
-        # Get avg perf
+    # Get avg perf
 
     # Remove duplicates...
     n_labels = []
@@ -1034,7 +967,6 @@ def class_report(class_id):
         for hmwk in topic.homeworks:
             top = pdf.y
             pdf.multi_cell(0, 5, topic.name +" (Hmwk) "+hmwk.name)
-            ############################################################labels.append("HMWK "+topic.name+" "+hmwk.name)
 
             # Get avg perf
             mrks = []
@@ -1100,42 +1032,9 @@ def class_report(class_id):
             mrks = []
 
 
-    #classes_perf_per_test.datasets.append(classes_perf_per_test_data)
-
-            # Get avg perf
-
-    # Remove duplicates...
-    # n_labels = []
-    # for label in labels:
-    #     if not label in n_labels:
-    #         n_labels.append(label)
-    #
-    # classes_perf_per_test.labels = n_labels
-    #
-    # print(n_labels)
-    # print()
-    # print()
-    # print()
-
-
-
-
-
-
-
-
-
-
-
     pdf.output(app.config['PDF_FILE_DUMP'] + "student_report.pdf")
 
     return send_file("static/pdf_gen/student_report.pdf", attachment_filename='student_report.pdf')
-
-
-
-
-
-
 
 
 # Route for adding a new student. If POST method is used then user input is validated and
@@ -1192,14 +1091,8 @@ def students():
 
         search_results = Student.query.filter(Student.name.like('%' + s_form.search_query.data + '%'))
         search_results = search_results.filter(Student.id.in_(student_ids))
-
-
-
-
         srch = 1
 
-
-    # students = Student.query.filter_by(teacher=current_user).paginate(page=page, per_page=5)
     return render_template('all_students.html',
                         title="My Students",
                         students=students,
@@ -1207,6 +1100,7 @@ def students():
                         s_form=s_form,
                         search_results=search_results,
                         srch=srch)
+
 
 # Allows the user to view all the details of a specific student who's id will be passed into the url. This is mostly done
 # automatically by a button on the interface. If the user is trying to access the details of a student that they do not
@@ -1229,9 +1123,6 @@ def student(student_id):
     temp_data = []
     labels = []
 
-
-
-    #print(xclass.class_name)
     classes_perf_per_test_data = {"label":student.name, "data":[]}
 
     for topic in topics:
@@ -1276,8 +1167,6 @@ def student(student_id):
 
     classes_perf_per_test.datasets.append(classes_perf_per_test_data)
 
-        # Get avg perf
-
     # Remove duplicates...
     n_labels = []
     for label in labels:
@@ -1290,11 +1179,6 @@ def student(student_id):
 
 
     return render_template('single_student.html', title=student.name, student=student, class_perf=classes_perf_per_test)
-
-
-################ BUG REPORT:
-################ Currently only the first class of students classes is updated!
-################ Need to make this so that every class they are a part of can be updated or removed.
 
 
 # Allows the user to update the details of a student, it returns a form with all current values filled in.
@@ -1310,7 +1194,6 @@ def update_student(student_id):
     courses = db.session.query(Course.id).filter_by(teacher=current_user)
     classes = Class.query.filter(Class.course_id.in_(courses))
     form.class_id.choices = [(xclass.id, xclass.class_name) for xclass in classes]
-    # form.class_id.choices = [(xclass.id, xclass.class_name) for xclass in Class.query.filter_by(teacher=current_user)]
     if form.validate_on_submit():
         join_class = Class.query.filter_by(id=form.class_id.data).first_or_404()
         student.classes[0] = join_class # Only the first class
@@ -1345,6 +1228,7 @@ def delete_student(student_id):
     flash('Your student has been deleted!', 'success')
     return redirect(url_for('students'))
 
+
 # This endpoint takes the id of a student and allows the user to add them to a class. This is usually used from the student
 # page from a button called add to class.
 @app.route("/student/<int:student_id>/add_to_class", methods=['GET', 'POST'])
@@ -1365,8 +1249,6 @@ def add_to_class(student_id):
         flash('Your class has been updated!', 'success')
         return redirect(url_for('student', student_id=student.id))
     elif request.method == 'GET':
-
-        # This NEEDS to be optimized!
         current_classes = student.classes
         for j in range(len(form.class_id.choices)):
             for i, xclass in enumerate(form.class_id.choices):
@@ -1390,10 +1272,8 @@ def remove_from_class(student_id):
     courses = db.session.query(Course.id).filter_by(teacher=current_user)
     classes = Class.query.filter(Class.course_id.in_(courses))
     form.class_id.choices = [(xclass.id, xclass.class_name) for xclass in classes if xclass in student.classes]
-    # form.class_id.choices = [(xclass.id, xclass.class_name) for xclass in Class.query.filter_by(teacher=current_user)]
     if form.validate_on_submit():
         remove_class = Class.query.filter_by(id=form.class_id.data).first_or_404()
-        #student.classes.append(join_class)
 
         if not (len(student.classes) > 1):
             flash('You cannot delete the only class a student is assigned to.', 'danger')
@@ -1408,7 +1288,6 @@ def remove_from_class(student_id):
         return redirect(url_for('student', student_id=student.id))
     elif request.method == 'GET':
         pass
-        # form.class_id.choices = [(xclass.id, xclass.class_name) for xclass in Class.query.filter_by(teacher=current_user) if xclass in student.classes]
 
     return render_template('add_student_to_class.html', title='Remove Student From Class',
                            form=form, legend='Remove Student From Class')
@@ -1482,7 +1361,6 @@ def student_report(student_id):
     marks = HomeworkMark.query.filter_by(student_id=student.id).all()
 
     for mark in marks:
-        #hmwk = Homework.query.get_or_404(mark.homework_id)
         hmwk = mark.homework
 
         top = pdf.y
@@ -1507,11 +1385,10 @@ def student_report(student_id):
     pdf.set_font("Arial", size=10)
     pdf.ln(3)
 
-    # FOR TEST
+    # FOR TESTS
     marks = TestMark.query.filter_by(student_id=student.id).all()
 
     for mark in marks:
-        #hmwk = Homework.query.get_or_404(mark.homework_id)
         test = mark.test
 
         top = pdf.y
@@ -1546,7 +1423,6 @@ def new_homework(topic_id):
     topic = Topic.query.first_or_404(topic_id)
     if topic.course.teacher != current_user:
         abort(403)
-    # form.topic.choices = [(topic.id, topic.name) for topic in Topic.query.filter_by(teacher=current_user)]
     if form.validate_on_submit():
 
         topic = Topic.query.first_or_404(topic_id)
@@ -1597,10 +1473,6 @@ def homework(homework_id):
             except:
                 mrks.append(0)
 
-
-
-        print(mrks)
-        #print(sum(mrks))
         try:
             avg = sum(mrks) / len(mrks)
         except ZeroDivisionError:
@@ -1611,8 +1483,6 @@ def homework(homework_id):
 
     if sum(class_perf_data["data"]) != 0:
         class_perf.datasets.append(class_perf_data)
-
-
 
     return render_template('single_homework.html', title=homework.name, homework=homework, class_perf=class_perf)
 
@@ -1626,7 +1496,6 @@ def update_homework(homework_id):
     form = HomeworkForm()
 
     courses = Course.query.filter_by(teacher=current_user).all()
-    #form.topic_id.choices = [(course.id, course.name) for num, course in enumerate(courses)]
 
     if form.validate_on_submit():
 
@@ -1634,7 +1503,6 @@ def update_homework(homework_id):
             homework.name = form.name.data
             homework.due_date = form.due_date.data
             homework.max_mark = form.max_mark.data
-            #homework.topic_id = form.topic_id.data
             db.session.commit()
             flash('Your homework has been updated!', 'success')
             return redirect(url_for('topics'))
@@ -1646,8 +1514,6 @@ def update_homework(homework_id):
         form.name.data = homework.name
         form.due_date.data = homework.due_date
         form.max_mark.data = homework.max_mark
-        #form.course_id.data = homework.topic.id
-        #form.course_id.enabled = True
     return render_template('new_homework.html', title='Update Homework',
                            form=form, legend='Update Homework')
 
@@ -1756,7 +1622,6 @@ def new_test(topic_id):
     if topic.course.teacher != current_user:
         abort(403)
 
-    # form.topic.choices = [(topic.id, topic.name) for topic in Topic.query.filter_by(teacher=current_user)]
     if form.validate_on_submit():
 
 
@@ -1807,10 +1672,6 @@ def test(test_id):
             except:
                 mrks.append(0)
 
-
-
-        print(mrks)
-        #print(sum(mrks))
         try:
             avg = sum(mrks) / len(mrks)
         except ZeroDivisionError:
@@ -1818,10 +1679,8 @@ def test(test_id):
         class_perf_data["data"].append(avg)
         mrks = []
 
-
     if sum(class_perf_data["data"]) != 0:
         class_perf.datasets.append(class_perf_data)
-
 
     return render_template('single_test.html', title=test.name, test=test, class_perf=class_perf)
 
@@ -1834,16 +1693,12 @@ def update_test(test_id):
         abort(403)
     form = TestForm()
 
-    # courses = Course.query.filter_by(teacher=current_user).all()
-    # form.course_id.choices = [(course.id, course.name) for num, course in enumerate(courses)]
-
     if form.validate_on_submit():
 
         if form.date.data > test.topic.start_date.date() and form.date.data < test.topic.end_date.date():
             test.name = form.name.data
             test.max_mark = form.max_mark.data
             test.date = form.date.data
-            # test.course_id = form.course_id.data
             db.session.commit()
             flash('Your test has been updated!', 'success')
             return redirect(url_for('topics'))
@@ -1856,8 +1711,7 @@ def update_test(test_id):
         form.name.data = test.name
         form.max_mark.data = test.max_mark
         form.date.data = test.date
-        # form.course_id.data = test.course.id
-        # form.course_id.enabled = True
+
     return render_template('new_test.html', title='Update Test',
                            form=form, legend='Update Test')
 
@@ -1963,7 +1817,6 @@ def mark_test(test_id):
 @login_required
 def new_exam(course_id):
     form = ExamForm()
-    # form.course.choices = [(course.id, course.name) for course in Topic.query.filter_by(teacher=current_user)]
     if form.validate_on_submit():
         new_exam = Exam(name=form.name.data,
                                 date=form.date.data,
@@ -2118,12 +1971,6 @@ def courses():
     page = request.args.get('page', 1, type=int)
     courses = Course.query.filter_by(teacher=current_user)
 
-    #for course in courses:
-    #        course.topics = Topic.query.filter_by(course=course).all()
-
-    #  homeworks = db.session.query(Homework).filter(Homework.id.in_((course.id for course in courses))).all()
-    #  homeworks = db.session.query(Test).filter(Test.id.in_((course.id for course in courses))).all()
-
     courses = courses.paginate(page=page, per_page=5)
 
     return render_template('all_courses.html', title="My Courses", courses=courses, user=current_user)
@@ -2181,7 +2028,6 @@ def delete_course(course_id):
     return redirect(url_for('courses'))
 
 # TOPICS
-# WRITTEN CODE TO FIND DATES THAT SHOULD BE BLOCKED BUT VALIDATION IS CURRENTLY NOT IMPLEMENTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 @app.route("/new_topic", methods=['GET', 'POST'])
 @login_required
@@ -2194,11 +2040,8 @@ def new_topic():
     if not len(courses):
         flash(Markup('To add a topic you must first <a href="' + url_for('new_course') + '">add a course</a>.'), 'danger')
 
-
     # If user doesn't request for a course, then enable the select box and set the result as the course_id...
     from datetime import date, timedelta
-
-
 
     try:
         course_id = request.args['course_id']
@@ -2223,9 +2066,6 @@ def new_topic():
     except KeyError:
         form.course_id.enabled = True
         course_id = form.course_id.data
-
-
-
 
     if form.validate_on_submit():
 
@@ -2275,7 +2115,6 @@ def new_topic():
 @login_required
 def topics():
     page = request.args.get('page', 1, type=int)
-    # topics = Topic.query.filter_by(teacher=current_user)
     courses = Course.query.filter_by(teacher=current_user)
 
 
@@ -2297,16 +2136,6 @@ def topics():
 
     courses = courses.paginate(page=page, per_page=5)
 
-
-    # The following should already be done by a realtionship!
-    # for topic in topics:
-    #     topic.homeworks = Homework.query.filter_by(parent_topic=topic).all()
-    #     topic.tests = Test.query.filter_by(parent_topic=topic).all()
-
-    #  homeworks = db.session.query(Homework).filter(Homework.id.in_((topic.id for topic in topics))).all()
-    #  homeworks = db.session.query(Test).filter(Test.id.in_((topic.id for topic in topics))).all()
-
-    # topics = topics.paginate(page=page, per_page=5)
 
     return render_template('all_topics.html',
                         title="My Topics",
@@ -2386,16 +2215,9 @@ def delete_topic(topic_id):
         abort(403)
 
     for test in topic.tests:
-        for mark in test.test_marks:
-            db.session.delete(mark)
-
         db.session.delete(test)
-            
 
     for hmwk in topic.homeworks:
-        for mark in hmwk.homework_marks:
-            db.session.delete(mark)
-
         db.session.delete(hmwk)
 
     db.session.delete(topic)

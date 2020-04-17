@@ -1,3 +1,5 @@
+//This is a module I built that is used on the front end to display all the graphs on the dashboard and student pages.
+
 function random_rgb() {
   // Generates random colours...
   var o = Math.round, r = Math.random, s = 255;
@@ -23,8 +25,6 @@ function generateGraphColours(num) {
     backgroundColours: backgroundColours
   }
 }
-
-
 
 
 function buildChartDataset(data, type) {
@@ -53,10 +53,6 @@ function buildChartDataset(data, type) {
     var cols = generateGraphColours(7);
     var colours = cols.borderColours;
 
-
-    // var myColors = ['red', 'green', 'blue'];
-
-
     // Generating dataset for all data needed in the graph.
     x = 0
     for (datum of data) {
@@ -84,11 +80,6 @@ function changeChart(elmtId, type, labels, data) {
   // Grabing the elements we need from the HTML.
   var canvas = document.getElementById(elmtId);
   var context = canvas.getContext('2d');
-
-  // Clear the chart for redrawing.
-  //context.clearRect(0, 0, canvas.width, canvas.height);
-
-
 
   // Building correctly stuctured datasets out of the data.
   var datasets = buildChartDataset(data, type);

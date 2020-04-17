@@ -111,7 +111,7 @@ a.article-title:hover {
   content: '';
   position: absolute;
   top:0;
-  margin: 0 -1px; /* tweak */
+  margin: 0 -1px;
   width: 100%;
   height: 100%;
   background: #17a2b8;
@@ -122,4 +122,3 @@ a.article-title:hover {
 .ribbon:after {
   left:100%;
 }
-/* End Of Ribbon Stuff */

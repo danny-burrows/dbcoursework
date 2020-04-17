@@ -1,3 +1,8 @@
+# This is all the form classes, they are imported and intansiated in the routes.py file
+# and used to build form objects in the flask app which are validated on submission
+# of the forms by the user.
+
+
 from flask_wtf import FlaskForm, Form
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
@@ -9,11 +14,13 @@ import datetime
 import re
 
 
+# Generic search form for students, topics, users, posts e.t.c.
 class SearchForm(FlaskForm):
     search_query = StringField('Search', validators=[DataRequired()])
     submit = SubmitField('🔍')
 
 
+# Registration form for new users.
 class RegistrationForm(FlaskForm):
     username = StringField('Username',
                            validators=[DataRequired(), Length(min=2, max=20)])
@@ -24,11 +31,13 @@ class RegistrationForm(FlaskForm):
                                      validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign Up')
 
+    # Checking that the username entered is unique.
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
         if user:
             raise ValidationError('That username is taken. Please choose a different one.')
 
+    # Checking that email is not taken by another user.
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
         if user:
@@ -39,7 +48,7 @@ class LoginForm(FlaskForm):
     email = StringField('Email',
                         validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
-    remember = BooleanField('Remember Me')
+    remember = BooleanField('Remember Me') # Check if the user wants a cookie for login.
     submit = SubmitField('Login')
 
 
@@ -51,12 +60,14 @@ class UpdateAccountForm(FlaskForm):
     picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Update')
 
+    # Checking that the username entered is unique.
     def validate_username(self, username):
         if username.data != current_user.username:
             user = User.query.filter_by(username=username.data).first()
             if user:
                 raise ValidationError('That username is taken. Please choose a different one.')
 
+    # Checking that email is not taken by another user.
     def validate_email(self, email):
         if email.data != current_user.email:
             user = User.query.filter_by(email=email.data).first()
@@ -95,11 +106,6 @@ class ClassForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
-# Validate phone... maybe auto provide area code.
-# Validate predicted grade as a recognised grade.
-# ^Perhaps have a setting to chenge the class grading mode from 9-1 to A-U.
-
-
 class StudentForm(FlaskForm):
     class_id = SelectField('Add To Class', coerce=int, validators=[DataRequired()])
     name = StringField('Student Name', validators=[DataRequired(), Length(max=50)])
@@ -116,7 +122,6 @@ class StudentForm(FlaskForm):
             raise ValidationError(msg)
 
 
-
 class AddStudentToClass(FlaskForm):
     class_id = SelectField('Add To Class', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Submit')
@@ -127,7 +132,6 @@ class RemoveStudentFromClass(FlaskForm):
     submit = SubmitField('Submit')
 
 
-# Maybe a way to add multiple...
 class AddStudentsToClass(FlaskForm):
     students = SelectField('Add Students', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Submit')
@@ -154,8 +158,6 @@ class HomeworkForm(FlaskForm):
 
 class TestForm(FlaskForm):
     name = StringField('Test Name', validators=[DataRequired()])
-    # topic = SelectField('Topic', coerce=int)
-    # grade_system = SelectField('Grading System', coerce=int)
     max_mark = IntegerField('Maximum Mark (Numbers Only)', validators=[DataRequired()])
     date = DateField('Date', validators=[DataRequired()])
     submit = SubmitField('Submit')
