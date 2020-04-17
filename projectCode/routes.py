@@ -900,6 +900,8 @@ def delete_class(class_id):
     xclass = Class.query.get_or_404(class_id)
     if xclass.course.teacher != current_user:
         abort(403)
+    for student in xclass.students:
+        db.session.delete(student)
     db.session.delete(xclass)
     db.session.commit()
     flash('Your class has been deleted!', 'success')
@@ -2014,12 +2016,23 @@ def delete_course(course_id):
         abort(403)
 
     for topic in course.topics:
+        for test in topic.tests:
+            for mark in test.test_marks:
+                db.session.delete(mark)
+            db.session.delete(test)
+
+        for hmwk in topic.homeworks:
+            for mark in hmwk.homework_marks:
+                db.session.delete(mark)
+            db.session.delete(hmwk)
         db.session.delete(topic)
 
     for exam in course.exams:
         db.session.delete(exam)
 
     for xclass in course.classes:
+        for student in xclass.students:
+                db.session.delete(student)
         db.session.delete(xclass)
 
     db.session.delete(course)
