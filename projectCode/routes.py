@@ -1664,7 +1664,7 @@ def test(test_id):
     for xclass in cur_top_classes:
         for student in xclass.students:
             try:
-                mark = TestMark.query.filter_by(homework_id=homework.id).filter_by(student_id=student.id).all()[0].mark
+                mark = TestMark.query.filter_by(test_id=test.id).filter_by(student_id=student.id).all()[0].mark
             except IndexError:
                 mark = 0
             try:
@@ -2215,9 +2215,13 @@ def delete_topic(topic_id):
         abort(403)
 
     for test in topic.tests:
+        for mark in test.test_marks:
+            db.session.delete(mark)
         db.session.delete(test)
 
     for hmwk in topic.homeworks:
+        for mark in hmwk.homework_marks:
+            db.session.delete(mark)
         db.session.delete(hmwk)
 
     db.session.delete(topic)
