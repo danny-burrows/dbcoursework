@@ -103,6 +103,7 @@ def home():
 # The dash route contains all the calculation and response for the data displayed
 # in the dashboard page.
 @app.route("/dash")
+@login_required
 def dash():
 
     courses = Course.query.filter_by(teacher=current_user)
