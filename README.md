@@ -1,4 +1,4 @@
-# ![Student Track](https://github.com/TheBrokenEstate/dbcoursework/master/student_track_logo.jpg)
+# ![Student Track](https://raw.githubusercontent.com/TheBrokenEstate/dbcoursework/master/student_track_logo.jpg)
 ---
 This is the code for my Computer Science coursework project. Please read the "Setup and Installation" section to get started.
 
