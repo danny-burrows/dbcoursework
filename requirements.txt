@@ -6,3 +6,4 @@ flask_mail
 flask_wtf
 pillow
 fpdf
+email_validator
